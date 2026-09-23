@@ -1,5 +1,12 @@
 fileFormatVersion: 2
 guid: d675f277c55e2cd4bad5693124773dce
+AssetOrigin:
+  serializedVersion: 1
+  productId: 195139
+  packageName: A.U.R.W. URP Free
+  packageVersion: 4.1
+  assetPath: Assets/Phantom Studios/Demo/AURW/AURW Demo Scene/ReflectionProbe-1.exr
+  uploadId: 768540
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -128,10 +135,3 @@ TextureImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 195139
-  packageName: A.U.R.W. URP Free
-  packageVersion: 4.1
-  assetPath: Assets/Phantom Studios/Demo/AURW/AURW Demo Scene/ReflectionProbe-1.exr
-  uploadId: 768540

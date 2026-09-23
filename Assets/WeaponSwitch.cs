@@ -6,9 +6,7 @@ public class WeaponSwitch : MonoBehaviour
     public GameObject axe;
     public GameObject gun;
 
-    // 0 = 素手
-    // 1 = 斧
-    // 2 = 銃
+    // 0 = 素手, 1 = 斧, 2 = 銃
     private int currentWeapon = 0;
 
     void Start()
@@ -18,7 +16,8 @@ public class WeaponSwitch : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Tab))
+        // 左コントローラー Yボタンで武器切り替え
+        if (OVRInput.GetDown(OVRInput.Button.Three))
         {
             currentWeapon++;
 
@@ -33,7 +32,6 @@ public class WeaponSwitch : MonoBehaviour
 
     void SetWeapon(int weapon)
     {
-        // まず全部OFF
         if (axe != null)
         {
             axe.SetActive(false);
@@ -44,31 +42,25 @@ public class WeaponSwitch : MonoBehaviour
             gun.SetActive(false);
         }
 
-        // 選択された武器だけON
         switch (weapon)
         {
             case 0:
-                // 素手
                 Debug.Log("素手");
                 break;
 
             case 1:
-                // 斧
                 if (axe != null)
                 {
                     axe.SetActive(true);
                 }
-
                 Debug.Log("斧");
                 break;
 
             case 2:
-                // 銃
                 if (gun != null)
                 {
                     gun.SetActive(true);
                 }
-
                 Debug.Log("銃");
                 break;
         }

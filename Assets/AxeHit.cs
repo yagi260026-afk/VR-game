@@ -2,27 +2,23 @@ using UnityEngine;
 
 public class AxeHit : MonoBehaviour
 {
-    [Header("斧の攻撃スクリプト")]
-    public AxeAttack axeAttack;
+    [Header("連続ヒット防止の時間（秒）")]
+    public float hitCooldown = 0.5f;
+    private float lastHitTime = 0f;
 
     void OnTriggerEnter(Collider other)
     {
-        Debug.Log("斧が当たった：" + other.gameObject.name);
-
-        // 斧を振っていないなら終了
-        if (axeAttack != null &&
-            !axeAttack.isAttacking)
+        // 最後に当たってから、まだクールダウン（0.5秒）経過していなければ終了
+        // （VRで木にめり込んだ時に、1秒間に60回ダメージが入ってしまうのを防ぐため）
+        if (Time.time - lastHitTime < hitCooldown)
         {
             return;
         }
 
-
         // =========================
         // 鉱石
         // =========================
-
         Ore ore = other.GetComponent<Ore>();
-
         if (ore == null)
         {
             ore = other.GetComponentInParent<Ore>();
@@ -31,30 +27,17 @@ public class AxeHit : MonoBehaviour
         if (ore != null)
         {
             Debug.Log("★★ 鉱石を発見！ ★★");
-
-            if (axeAttack != null &&
-                axeAttack.hasHitOre)
-            {
-                return;
-            }
-
-            if (axeAttack != null)
-            {
-                axeAttack.hasHitOre = true;
-            }
-
             ore.HitOre();
 
+            // ヒットした時間を記録
+            lastHitTime = Time.time;
             return;
         }
-
 
         // =========================
         // 木
         // =========================
-
         TreeFall tree = other.GetComponent<TreeFall>();
-
         if (tree == null)
         {
             tree = other.GetComponentInParent<TreeFall>();
@@ -63,20 +46,10 @@ public class AxeHit : MonoBehaviour
         if (tree != null)
         {
             Debug.Log("★★ 木を発見！ ★★");
-
-            if (axeAttack != null &&
-                axeAttack.hasHitTree)
-            {
-                return;
-            }
-
-            if (axeAttack != null)
-            {
-                axeAttack.hasHitTree = true;
-            }
-
             tree.HitTree();
 
+            // ヒットした時間を記録
+            lastHitTime = Time.time;
             return;
         }
     }

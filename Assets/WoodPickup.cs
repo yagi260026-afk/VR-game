@@ -2,149 +2,83 @@ using UnityEngine;
 
 public class WoodPickup : MonoBehaviour
 {
-    public Camera cam;
-
-    public Transform holdPoint;
-
+    [Header("VR手元設定")]
+    public Transform controllerTransform; // 右コントローラー (RightHandAnchor)
+    public Transform holdPoint;            // オブジェクトを保持する手元位置
     public float grabDistance = 3f;
 
     private GameObject heldObject;
-
     private Rigidbody heldRB;
-
     private Collider heldCollider;
-
     private AxeToggle axeToggle;
-
 
     void Start()
     {
-        axeToggle =
-            GetComponent<AxeToggle>();
-    }
+        axeToggle = GetComponent<AxeToggle>();
 
+        // 安全対策：Inspectorで設定し忘れていた場合の警告と応急処置
+        if (controllerTransform == null)
+        {
+            Debug.LogError("🚨WoodPickup: 'Controller Transform' が設定されていません！Inspectorを確認してください。");
+            controllerTransform = this.transform;
+        }
+        if (holdPoint == null)
+        {
+            Debug.LogError("🚨WoodPickup: 'Hold Point' が設定されていません！Inspectorを確認してください。");
+            holdPoint = this.transform;
+        }
+    }
 
     void Update()
     {
-        // =========================
-        // 斧装備中
-        // =========================
+        if (axeToggle != null && axeToggle.axeEquipped) return;
 
-        if (
-            axeToggle != null &&
-            axeToggle.axeEquipped
-        )
+        // 右コントローラーのグリップ（中指）ボタン、またはマウスの右クリック
+        if (OVRInput.GetDown(OVRInput.Button.SecondaryHandTrigger) || Input.GetMouseButtonDown(1))
         {
-            return;
+            if (heldObject == null) PickUp();
+            else Drop();
         }
 
-
-        // =========================
-        // 左クリック
-        // =========================
-
-        if (Input.GetMouseButtonDown(0))
+        if (heldObject != null && holdPoint != null)
         {
-            if (heldObject == null)
-            {
-                PickUp();
-            }
-            else
-            {
-                Drop();
-            }
-        }
-
-
-        // =========================
-        // 持っている物を追従
-        // =========================
-
-        if (heldObject != null)
-        {
-            heldObject.transform.position =
-                holdPoint.position;
-
-            heldObject.transform.rotation =
-                holdPoint.rotation;
+            heldObject.transform.position = holdPoint.position;
+            heldObject.transform.rotation = holdPoint.rotation;
         }
     }
-
-
-    // =========================
-    // 拾う
-    // =========================
 
     void PickUp()
     {
-        Ray ray =
-            cam.ScreenPointToRay(
-                Input.mousePosition
-            );
+        if (controllerTransform == null) return;
 
-        if (
-            Physics.Raycast(
-                ray,
-                out RaycastHit hit,
-                grabDistance
-            )
-        )
+        Ray ray = new Ray(controllerTransform.position, controllerTransform.forward);
+
+        // テスト用にRayを可視化
+        Debug.DrawRay(ray.origin, ray.direction * grabDistance, Color.green, 2f);
+
+        if (Physics.Raycast(ray, out RaycastHit hit, grabDistance))
         {
-            if (
-                hit.collider.CompareTag(
-                    "Wood"
-                )
-            )
+            if (hit.collider.CompareTag("Wood"))
             {
-                heldObject =
-                    hit.collider.gameObject;
+                Debug.Log("🪵 木材を掴みました！: " + hit.collider.gameObject.name);
+                heldObject = hit.collider.gameObject;
+                heldRB = heldObject.GetComponent<Rigidbody>();
+                heldCollider = heldObject.GetComponent<Collider>();
 
-                heldRB =
-                    heldObject.GetComponent<Rigidbody>();
-
-                heldCollider =
-                    heldObject.GetComponent<Collider>();
-
-
-                if (heldRB != null)
-                {
-                    heldRB.isKinematic =
-                        true;
-                }
-
-
-                if (heldCollider != null)
-                {
-                    heldCollider.enabled =
-                        false;
-                }
+                if (heldRB != null) heldRB.isKinematic = true;
+                if (heldCollider != null) heldCollider.enabled = false;
             }
         }
     }
 
-
-    // =========================
-    // 落とす
-    // =========================
-
     void Drop()
     {
-        if (heldRB != null)
-        {
-            heldRB.isKinematic =
-                false;
-        }
-
-        if (heldCollider != null)
-        {
-            heldCollider.enabled =
-                true;
-        }
+        Debug.Log("🪵 木材を離しました！");
+        if (heldRB != null) heldRB.isKinematic = false;
+        if (heldCollider != null) heldCollider.enabled = true;
 
         heldObject = null;
-
         heldRB = null;
-
         heldCollider = null;
     }
 }
